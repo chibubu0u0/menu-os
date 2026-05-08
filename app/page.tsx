@@ -71,33 +71,47 @@ async function getSiteSections() {
   return (data || []) as SiteSection[]
 }
 
-function splitLines(body: string | null) {
-  return (body || '')
-    .split('\n')
+function normalizeText(body: string | null | undefined) {
+  // Supabase SQL strings sometimes store the two characters "\\n" instead of real line breaks.
+  // This makes both formats display correctly on the website.
+  return (body || '').replace(/\\n/g, '\n')
+}
+
+function splitLines(body: string | null | undefined) {
+  return normalizeText(body)
+    .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
 }
 
+function OpeningTimeCard({ section }: { section?: SiteSection }) {
+  const lines = splitLines(
+    section?.body ||
+      'Monday ~ Friday 15:00 ~ 00:00\nSaturday & Sunday 14:00 ~ 00:00\n最後收客 23:30'
+  )
+
+  return (
+    <aside className="rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-5 text-[#d8cfbf]/70 backdrop-blur md:p-6">
+      <div className="mb-4 flex items-baseline justify-between gap-4 border-b border-white/10 pb-3">
+        <div>
+          <p className="mb-1 text-[0.68rem] uppercase tracking-[0.32em] text-white/35">營業時間</p>
+          <h2 className="font-serif text-2xl leading-none text-[#f8f1e6]">Opening Time</h2>
+        </div>
+      </div>
+      <div className="space-y-2 text-sm leading-7">
+        {lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+      <p className="mt-4 border-t border-white/10 pt-3 text-xs leading-6 text-white/40">
+        We stop seating guests 30 minutes before closing time.
+      </p>
+    </aside>
+  )
+}
+
 function SiteSectionCard({ section }: { section: SiteSection }) {
   const lines = splitLines(section.body)
-
-  if (section.style === 'opening') {
-    return (
-      <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 shadow-soft backdrop-blur md:p-8">
-        <div className="mb-5 border-b border-white/10 pb-4">
-          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Opening Time'}</p>
-          <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
-        </div>
-        <div className="grid gap-4 text-sm leading-7 text-[#d8cfbf]/65 md:grid-cols-3">
-          {lines.map((line) => (
-            <p key={line} className="rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4">
-              {line}
-            </p>
-          ))}
-        </div>
-      </section>
-    )
-  }
 
   if (section.style === 'rules') {
     const midpoint = Math.ceil(lines.length / 2)
@@ -155,7 +169,8 @@ export default async function MenuPage() {
   ])
 
   const hero = sections.find((section) => section.style === 'hero' || section.section_key === 'hero')
-  const visibleSections = sections.filter((section) => section.id !== hero?.id)
+  const opening = sections.find((section) => section.style === 'opening' || section.section_key === 'opening_time')
+  const visibleSections = sections.filter((section) => section.id !== hero?.id && section.id !== opening?.id)
   const categorySet = new Set(categories.map((category) => category.title))
   const displayItems = categories.length > 0 ? items.filter((item) => categorySet.has(item.category)) : items
 
@@ -167,18 +182,19 @@ export default async function MenuPage() {
     <main className="min-h-screen bg-[#15130f] px-5 py-8 text-[#f8f1e6] sm:px-8 lg:px-12">
       <section className="mx-auto flex max-w-6xl flex-col gap-8">
         <header className="rounded-[2rem] border border-white/10 bg-[#211d18]/85 p-7 shadow-soft backdrop-blur md:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div className="grid gap-8 lg:grid-cols-[1fr_0.82fr] lg:items-end">
             <div>
               <p className="mb-4 text-xs uppercase tracking-[0.42em] text-white/40">Menu OS</p>
               <h1 className="font-serif text-6xl leading-none tracking-tight md:text-8xl">{restaurantName}</h1>
               <p className="mt-4 text-sm uppercase tracking-[0.32em] text-white/40">{subtitle}</p>
+              {heroLines.length > 0 && (
+                <div className="mt-8 max-w-xl rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-sm leading-8 text-[#d8cfbf]/65">
+                  {heroLines.map((line) => <p key={line}>{line}</p>)}
+                </div>
+              )}
             </div>
 
-            {heroLines.length > 0 && (
-              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-sm leading-8 text-[#d8cfbf]/65">
-                {heroLines.map((line) => <p key={line}>{line}</p>)}
-              </div>
-            )}
+            <OpeningTimeCard section={opening} />
           </div>
         </header>
 
