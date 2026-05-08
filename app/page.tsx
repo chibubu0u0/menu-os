@@ -1,8 +1,21 @@
 import MenuBrowser from '@/components/MenuBrowser'
-import { hasSupabaseEnv, MenuItem, supabase } from '@/lib/supabase'
+import { hasSupabaseEnv, MenuCategory, MenuItem, SiteSection, supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function isWithinLimitedPeriod(item: MenuItem) {
+  if (!item.is_limited) return true
+
+  const today = todayISO()
+  if (item.start_date && today < item.start_date) return false
+  if (item.end_date && today > item.end_date) return false
+  return true
+}
 
 async function getMenuItems() {
   if (!hasSupabaseEnv) return []
@@ -19,66 +32,157 @@ async function getMenuItems() {
     return []
   }
 
-  return (data || []) as MenuItem[]
+  return ((data || []) as MenuItem[]).filter(isWithinLimitedPeriod)
+}
+
+async function getMenuCategories() {
+  if (!hasSupabaseEnv) return []
+
+  const { data, error } = await supabase
+    .from('menu_categories')
+    .select('*')
+    .eq('visible', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error(error)
+    return []
+  }
+
+  return (data || []) as MenuCategory[]
+}
+
+async function getSiteSections() {
+  if (!hasSupabaseEnv) return []
+
+  const { data, error } = await supabase
+    .from('site_sections')
+    .select('*')
+    .eq('visible', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error(error)
+    return []
+  }
+
+  return (data || []) as SiteSection[]
+}
+
+function splitLines(body: string | null) {
+  return (body || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+function SiteSectionCard({ section }: { section: SiteSection }) {
+  const lines = splitLines(section.body)
+
+  if (section.style === 'opening') {
+    return (
+      <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 shadow-soft backdrop-blur md:p-8">
+        <div className="mb-5 border-b border-white/10 pb-4">
+          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Opening Time'}</p>
+          <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
+        </div>
+        <div className="grid gap-4 text-sm leading-7 text-[#d8cfbf]/65 md:grid-cols-3">
+          {lines.map((line) => (
+            <p key={line} className="rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4">
+              {line}
+            </p>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (section.style === 'rules') {
+    const midpoint = Math.ceil(lines.length / 2)
+    return (
+      <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 text-sm leading-7 text-[#d8cfbf]/65 shadow-soft backdrop-blur md:p-8">
+        <div className="mb-5 border-b border-white/10 pb-4">
+          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'House Rules'}</p>
+          <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
+        </div>
+        <div className="grid gap-x-10 gap-y-2 md:grid-cols-2">
+          {[lines.slice(0, midpoint), lines.slice(midpoint)].map((chunk, index) => (
+            <ul key={index} className="space-y-2">
+              {chunk.map((line) => (
+                <li key={line}>‧ {line.replace(/^‧\s*/, '')}</li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (section.style === 'notice') {
+    return (
+      <section className="rounded-[2rem] bg-[#2a241d] p-6 text-[#fff6e6] shadow-soft md:p-8">
+        <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Notice'}</p>
+        <h2 className="font-serif text-4xl leading-none tracking-tight">{section.title}</h2>
+        {lines.length > 0 && (
+          <div className="mt-5 space-y-2 text-sm leading-7 text-white/60">
+            {lines.map((line) => <p key={line}>{line}</p>)}
+          </div>
+        )}
+      </section>
+    )
+  }
+
+  return (
+    <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 text-sm leading-7 text-[#d8cfbf]/65 shadow-soft backdrop-blur md:p-8">
+      <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Section'}</p>
+      <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
+      {lines.length > 0 && (
+        <div className="mt-5 space-y-2">
+          {lines.map((line) => <p key={line}>{line}</p>)}
+        </div>
+      )}
+    </section>
+  )
 }
 
 export default async function MenuPage() {
-  const restaurantName = process.env.NEXT_PUBLIC_RESTAURANT_NAME || '離域'
-  const subtitle = process.env.NEXT_PUBLIC_RESTAURANT_SUBTITLE || 'Li-Yu Menu'
-  const items = await getMenuItems()
+  const [items, categories, sections] = await Promise.all([
+    getMenuItems(),
+    getMenuCategories(),
+    getSiteSections()
+  ])
+
+  const hero = sections.find((section) => section.style === 'hero' || section.section_key === 'hero')
+  const visibleSections = sections.filter((section) => section.id !== hero?.id)
+  const categorySet = new Set(categories.map((category) => category.title))
+  const displayItems = categories.length > 0 ? items.filter((item) => categorySet.has(item.category)) : items
+
+  const restaurantName = hero?.title || process.env.NEXT_PUBLIC_RESTAURANT_NAME || '離域'
+  const subtitle = hero?.english || process.env.NEXT_PUBLIC_RESTAURANT_SUBTITLE || 'Li-Yu Menu'
+  const heroLines = splitLines(hero?.body || '在城市的縫隙裡，留一段可以慢下來的時間。')
 
   return (
-    <main className="min-h-screen px-5 py-8 sm:px-8 lg:px-12">
+    <main className="min-h-screen bg-[#15130f] px-5 py-8 text-[#f8f1e6] sm:px-8 lg:px-12">
       <section className="mx-auto flex max-w-6xl flex-col gap-8">
-        <header className="rounded-[2rem] border border-black/10 bg-white/75 p-7 shadow-soft backdrop-blur md:p-10">
+        <header className="rounded-[2rem] border border-white/10 bg-[#211d18]/85 p-7 shadow-soft backdrop-blur md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
-              <p className="mb-4 text-xs uppercase tracking-[0.42em] text-black/45">Opening Time</p>
+              <p className="mb-4 text-xs uppercase tracking-[0.42em] text-white/40">Menu OS</p>
               <h1 className="font-serif text-6xl leading-none tracking-tight md:text-8xl">{restaurantName}</h1>
-              <p className="mt-4 text-sm uppercase tracking-[0.32em] text-black/45">{subtitle}</p>
+              <p className="mt-4 text-sm uppercase tracking-[0.32em] text-white/40">{subtitle}</p>
             </div>
 
-            <div className="rounded-3xl border border-black/10 bg-[#fbfaf7] p-5 text-sm leading-8 text-black/65">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                <p>
-                  <span className="block text-[0.68rem] uppercase tracking-[0.25em] text-black/40">Monday ~ Friday</span>
-                  <span className="text-lg text-black/80">15:00 ~ 00:00</span>
-                </p>
-                <p>
-                  <span className="block text-[0.68rem] uppercase tracking-[0.25em] text-black/40">Saturday & Sunday</span>
-                  <span className="text-lg text-black/80">14:00 ~ 00:00</span>
-                </p>
+            {heroLines.length > 0 && (
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-sm leading-8 text-[#d8cfbf]/65">
+                {heroLines.map((line) => <p key={line}>{line}</p>)}
               </div>
-              <p className="mt-4 border-t border-black/10 pt-4 text-xs leading-6 text-black/50">
-                （最後收客 23:30） We stop seating guests 30 minutes before closing time.
-              </p>
-            </div>
+            )}
           </div>
         </header>
 
-        <section className="rounded-[2rem] border border-black/10 bg-white/70 p-6 text-sm leading-7 text-black/60 shadow-soft backdrop-blur md:p-8">
-          <div className="mb-5 border-b border-black/10 pb-4">
-            <p className="mb-2 text-xs uppercase tracking-[0.32em] text-black/35">House Rules</p>
-            <h2 className="font-serif text-4xl leading-none tracking-tight text-black/85">入店規章</h2>
-          </div>
-
-          <div className="grid gap-x-10 gap-y-2 md:grid-cols-2">
-            <ul className="space-y-2">
-              <li>‧ 每人低消兩百五十元，不合併計算</li>
-              <li>‧ 座位依現場安排為主，用餐時間兩小時，禁用外食</li>
-              <li>‧ 目前僅提供現金結帳</li>
-              <li>‧ 點主餐可加購任一套餐</li>
-              <li>‧ 外食垃圾請自行帶出去處理，遺留者收取 200 元清潔費</li>
-            </ul>
-
-            <ul className="space-y-2">
-              <li>‧ 破杯清潔費酌收 300 元，嘔吐清潔費酌收 2000 元</li>
-              <li>‧ 目前無配合特約停車場，請勿違停影響交通與住戶出入</li>
-              <li>‧ 晚間十點後，二樓戶外區不開放，請勿大聲喧嘩</li>
-              <li>‧ 如有寵物隨行請置於寵物推車或寵物籃，勿影響其他客人用餐權益</li>
-            </ul>
-          </div>
-        </section>
+        {visibleSections.map((section) => <SiteSectionCard key={section.id} section={section} />)}
 
         {!hasSupabaseEnv && (
           <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
@@ -86,16 +190,16 @@ export default async function MenuPage() {
           </div>
         )}
 
-        {hasSupabaseEnv && items.length === 0 && (
-          <div className="rounded-3xl border border-black/10 bg-white/70 p-8 text-center shadow-soft">
-            <p className="text-lg font-semibold">目前還沒有上架中的菜單品項</p>
-            <p className="mt-2 text-sm text-black/55">登入 /admin 新增品項後，前台會自動顯示。</p>
+        {hasSupabaseEnv && displayItems.length === 0 && (
+          <div className="rounded-3xl border border-white/10 bg-[#211d18]/80 p-8 text-center shadow-soft">
+            <p className="text-lg font-semibold text-[#f8f1e6]">目前還沒有上架中的菜單品項</p>
+            <p className="mt-2 text-sm text-[#d8cfbf]/55">登入 /admin 新增品項後，前台會自動顯示。</p>
           </div>
         )}
 
-        {items.length > 0 && <MenuBrowser items={items} />}
+        {displayItems.length > 0 && <MenuBrowser items={displayItems} categories={categories} />}
 
-        <footer className="pb-6 text-center text-xs tracking-[0.28em] text-black/35">Powered by Menu OS</footer>
+        <footer className="pb-6 text-center text-xs tracking-[0.28em] text-white/35">Powered by Menu OS</footer>
       </section>
     </main>
   )
