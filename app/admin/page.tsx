@@ -208,20 +208,21 @@ function LayoutStyleSelector({ value, onChange }: { value: string; onChange: (va
     {
       value: 'list',
       title: '標準列表',
-      description: '適合咖啡、飲品、甜點這種資訊少、品項多的分類。',
+      badge: 'LIST',
+      description: '適合咖啡、飲品、甜點這種資訊少、品項多的分類。前台會保持乾淨，讓客人快速掃價格。',
       sample: (
-        <div className="space-y-2">
-          <div className="flex items-start justify-between gap-4 border-b border-black/10 pb-2">
+        <div className="space-y-3">
+          <div className="grid grid-cols-[1fr_auto] gap-4 rounded-2xl border border-black/10 bg-white/70 p-3">
             <div>
               <p className="text-sm font-medium text-black/80">拿鐵</p>
-              <p className="text-[0.68rem] uppercase tracking-[0.14em] text-black/35">Latte</p>
+              <p className="mt-0.5 text-[0.68rem] uppercase tracking-[0.14em] text-black/35">Latte</p>
             </div>
             <p className="font-serif text-base text-black/70">120$</p>
           </div>
-          <div className="flex items-start justify-between gap-4 border-b border-black/10 pb-2">
+          <div className="grid grid-cols-[1fr_auto] gap-4 rounded-2xl border border-black/10 bg-white/70 p-3">
             <div>
               <p className="text-sm font-medium text-black/80">美式咖啡</p>
-              <p className="text-[0.68rem] uppercase tracking-[0.14em] text-black/35">Americano</p>
+              <p className="mt-0.5 text-[0.68rem] uppercase tracking-[0.14em] text-black/35">Americano</p>
             </div>
             <p className="font-serif text-base text-black/70">100$</p>
           </div>
@@ -231,46 +232,50 @@ function LayoutStyleSelector({ value, onChange }: { value: string; onChange: (va
     {
       value: 'flavor',
       title: '手沖 / 風味描述',
-      description: '適合豆單、茶款、酒類這種需要呈現處理法、焙度、風味筆記的分類。',
+      badge: 'FLAVOR',
+      description: '適合豆單、茶款、酒類這種需要呈現處理法、焙度、品種與風味筆記的分類。',
       sample: (
-        <div className="rounded-2xl border border-black/10 bg-white/70 p-3">
-          <div className="flex items-start justify-between gap-3">
+        <div className="rounded-2xl border border-black/10 bg-white/70 p-4">
+          <div className="grid grid-cols-[1fr_auto] gap-4">
             <div>
               <p className="font-serif text-lg text-black/80">衣索比亞 古吉 蜂</p>
               <p className="mt-1 text-[0.68rem] uppercase tracking-[0.12em] text-black/35">Ethiopia Guji Bee</p>
             </div>
             <p className="font-serif text-base text-black/70">160$</p>
           </div>
-          <p className="mt-3 text-xs leading-5 text-black/45">紅蜜處理法｜淺焙｜Heirloom 品種</p>
-          <p className="mt-1 text-xs leading-5 text-black/45">水蜜桃、佛手柑、蜂蜜、荔枝軟糖</p>
+          <div className="mt-3 space-y-1 border-t border-black/10 pt-3">
+            <p className="text-xs leading-5 text-black/45">紅蜜處理法｜淺焙｜Heirloom 品種</p>
+            <p className="text-xs leading-5 text-black/45">水蜜桃、佛手柑、蜂蜜、荔枝軟糖</p>
+          </div>
         </div>
       )
     },
     {
       value: 'card',
       title: '單欄卡片',
-      description: '適合期間限定、主餐、招牌推薦，讓品項看起來更像企劃主打。',
+      badge: 'CARD',
+      description: '適合期間限定、主餐、招牌推薦，讓品項看起來更像企劃主打，不會被一般品項淹沒。',
       sample: (
-        <div className="rounded-2xl border border-black/10 bg-white/70 p-3">
-          <div className="mb-2 flex items-center gap-2">
+        <div className="rounded-2xl border border-black/10 bg-white/70 p-4">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-black px-2 py-0.5 text-[0.6rem] tracking-[0.14em] text-white">LIMITED</span>
             <span className="text-[0.65rem] tracking-[0.18em] text-black/35">SEASONAL</span>
           </div>
-          <div className="flex items-start justify-between gap-3">
+          <div className="grid grid-cols-[1fr_auto] gap-4">
             <div>
               <p className="font-serif text-lg text-black/80">離域蘋果派</p>
               <p className="mt-1 text-[0.68rem] uppercase tracking-[0.12em] text-black/35">Li-Yu Apple Pie</p>
             </div>
             <p className="font-serif text-base text-black/70">180$</p>
           </div>
-          <p className="mt-3 text-xs leading-5 text-black/45">可以用來放冰淇淋、季節水果、主廚推薦等補充說明。</p>
+          <p className="mt-3 border-t border-black/10 pt-3 text-xs leading-5 text-black/45">可以用來放冰淇淋、季節水果、主廚推薦等補充說明。</p>
         </div>
       )
     }
   ]
 
   return (
-    <div className="grid gap-3 md:grid-cols-3">
+    <div className="space-y-3">
       {cards.map((card) => {
         const selected = value === card.value
         return (
@@ -279,19 +284,24 @@ function LayoutStyleSelector({ value, onChange }: { value: string; onChange: (va
             type="button"
             onClick={() => onChange(card.value)}
             className={selected
-              ? 'rounded-[1.5rem] border border-black bg-[#fbfaf7] p-4 text-left shadow-soft ring-2 ring-black/10'
-              : 'rounded-[1.5rem] border border-black/10 bg-[#fbfaf7] p-4 text-left shadow-soft transition hover:border-black/30'}
+              ? 'w-full rounded-[1.5rem] border border-black bg-[#fbfaf7] p-4 text-left shadow-soft ring-2 ring-black/10'
+              : 'w-full rounded-[1.5rem] border border-black/10 bg-[#fbfaf7] p-4 text-left shadow-soft transition hover:border-black/30'}
           >
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div>
-                <p className="font-serif text-xl text-black/85">{card.title}</p>
-                <p className="mt-1 text-xs leading-5 text-black/45">{card.description}</p>
+            <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+              <div className="flex flex-col justify-between gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={selected ? 'rounded-full bg-black px-2.5 py-1 text-[0.65rem] tracking-[0.18em] text-white' : 'rounded-full border border-black/10 px-2.5 py-1 text-[0.65rem] tracking-[0.18em] text-black/35'}>{card.badge}</span>
+                    <span className={selected ? 'text-xs font-medium text-black/70' : 'text-xs text-black/35'}>{selected ? '目前使用中' : '點擊選擇'}</span>
+                  </div>
+                  <p className="mt-3 font-serif text-2xl text-black/85">{card.title}</p>
+                  <p className="mt-2 text-sm leading-7 text-black/48">{card.description}</p>
+                </div>
               </div>
-              <span className={selected ? 'rounded-full bg-black px-2 py-0.5 text-xs text-white' : 'rounded-full border border-black/10 px-2 py-0.5 text-xs text-black/35'}>
-                {selected ? '使用中' : '選擇'}
-              </span>
+              <div className="rounded-[1.25rem] bg-black/[0.03] p-3">
+                {card.sample}
+              </div>
             </div>
-            {card.sample}
           </button>
         )
       })}
