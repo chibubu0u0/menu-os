@@ -1,6 +1,7 @@
 import { hasSupabaseEnv, MenuItem, supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 type GroupedMenu = Record<string, MenuItem[]>
 
