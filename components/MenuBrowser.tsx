@@ -27,6 +27,10 @@ function splitMenuName(name: string) {
   }
 }
 
+function normalizeDisplayText(value: string | null | undefined) {
+  return (value || '').replace(/\\n/g, '\n')
+}
+
 function groupByCategory(items: MenuItem[]) {
   return items.reduce<GroupedMenu>((acc, item) => {
     const category = item.category || '未分類'
@@ -38,6 +42,8 @@ function groupByCategory(items: MenuItem[]) {
 
 function cleanRegularDescription(description: string | null, category: MenuCategory | undefined) {
   if (!description) return ''
+
+  description = normalizeDisplayText(description)
 
   if (category?.layout_style === 'flavor') return description
 
@@ -53,6 +59,8 @@ function cleanRegularDescription(description: string | null, category: MenuCateg
 function HandBrewDescription({ description }: { description: string | null }) {
   if (!description) return null
 
+  description = normalizeDisplayText(description)
+
   const [zhPart, ...enParts] = description.split(' / ')
   const zhTokens = zhPart.split('｜').map((part) => part.trim()).filter(Boolean)
   const zhMeta = zhTokens.slice(0, 3).join('｜')
@@ -63,11 +71,11 @@ function HandBrewDescription({ description }: { description: string | null }) {
   const enFlavors = enTokens.slice(3).join(', ')
 
   return (
-    <div className="mt-3 space-y-1.5 text-sm leading-6 text-[#d8cfbf]/60">
+    <div className="mt-3 space-y-1.5 text-sm leading-6 text-stone-500">
       {zhMeta && <p>{zhMeta}</p>}
-      {zhFlavors && <p className="text-[#f8f1e6]/80">- {zhFlavors}</p>}
-      {enMeta && <p className="pt-1 text-xs uppercase tracking-[0.08em] text-white/35">{enMeta}</p>}
-      {enFlavors && <p className="text-xs leading-5 text-[#d8cfbf]/45">- {enFlavors}</p>}
+      {zhFlavors && <p className="text-stone-800">- {zhFlavors}</p>}
+      {enMeta && <p className="pt-1 text-xs uppercase tracking-[0.08em] text-stone-400">{enMeta}</p>}
+      {enFlavors && <p className="text-xs leading-5 text-stone-400">- {enFlavors}</p>}
     </div>
   )
 }
@@ -79,24 +87,24 @@ function MenuLine({ item, category }: { item: MenuItem; category?: MenuCategory 
   const badge = item.label || (item.is_limited ? 'LIMITED' : item.featured ? 'POPULAR' : '')
 
   return (
-    <article className="group border-b border-white/10 py-4 last:border-0">
+    <article className="group border-b border-stone-200 py-4 last:border-0">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <h3 className="text-[1.02rem] font-medium tracking-[0.03em] text-[#f8f1e6]">{zh}</h3>
+            <h3 className="text-[1.02rem] font-medium tracking-[0.03em] text-stone-900">{zh}</h3>
             {badge && (
-              <span className="rounded-full border border-white/10 px-2 py-0.5 text-[0.62rem] tracking-[0.16em] text-white/35">{badge}</span>
+              <span className="rounded-full border border-stone-200 bg-stone-50 px-2 py-0.5 text-[0.62rem] tracking-[0.16em] text-stone-400">{badge}</span>
             )}
           </div>
-          {en && <p className="mt-0.5 text-xs leading-5 tracking-[0.08em] text-[#d8cfbf]/45">{en}</p>}
+          {en && <p className="mt-0.5 text-xs leading-5 tracking-[0.08em] text-stone-400">{en}</p>}
         </div>
-        <p className="whitespace-nowrap font-serif text-xl text-[#f8f1e6]/90">{formatPrice(item.price)}</p>
+        <p className="whitespace-nowrap font-serif text-xl text-stone-900">{formatPrice(item.price)}</p>
       </div>
 
       {isFlavorLayout ? (
         <HandBrewDescription description={item.description} />
       ) : cleanedDescription ? (
-        <p className="mt-2 text-sm leading-6 text-[#d8cfbf]/55">{cleanedDescription}</p>
+        <p className="mt-2 text-sm leading-6 text-stone-500">{cleanedDescription}</p>
       ) : null}
     </article>
   )
@@ -107,21 +115,21 @@ function CategoryPanel({ category, items }: { category: MenuCategory; items: Men
   const isCardLayout = category.layout_style === 'card'
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/85 p-6 shadow-soft backdrop-blur md:p-8">
-      <div className="mb-4 border-b border-white/10 pb-5">
+    <section className="rounded-[2rem] border border-stone-200/90 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
+      <div className="mb-4 border-b border-stone-200 pb-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            {category.eyebrow && <p className="mb-2 text-xs tracking-[0.32em] text-white/35">{category.eyebrow}</p>}
-            <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{category.title}</h2>
-            {category.english && <p className="mt-2 text-xs uppercase tracking-[0.28em] text-white/35">{category.english}</p>}
+            {category.eyebrow && <p className="mb-2 text-xs tracking-[0.32em] text-stone-400">{category.eyebrow}</p>}
+            <h2 className="font-serif text-4xl leading-none tracking-tight text-stone-950">{category.title}</h2>
+            {category.english && <p className="mt-2 text-xs uppercase tracking-[0.28em] text-stone-400">{category.english}</p>}
           </div>
-          <span className="rounded-full bg-white/[0.07] px-3 py-1 text-xs text-white/35">{items.length} items</span>
+          <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-400">{items.length} items</span>
         </div>
 
         {(category.note || category.subnote) && (
-          <div className="mt-4 space-y-1 text-sm leading-6 text-[#d8cfbf]/60">
-            {category.note && <p>{category.note}</p>}
-            {category.subnote && <p>{category.subnote}</p>}
+          <div className="mt-4 space-y-1 text-sm leading-6 text-stone-500">
+            {category.note && <p>{normalizeDisplayText(category.note)}</p>}
+            {category.subnote && <p>{normalizeDisplayText(category.subnote)}</p>}
           </div>
         )}
       </div>
@@ -140,24 +148,24 @@ function FeaturedMenu({ items }: { items: MenuItem[] }) {
   if (featuredItems.length === 0) return null
 
   return (
-    <section className="rounded-[2rem] bg-[#1f1b16] p-6 text-[#fffaf0] shadow-soft md:p-8">
-      <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+    <section className="rounded-[2rem] border border-stone-200 bg-[#fbf7ef] p-6 text-stone-950 shadow-sm md:p-8">
+      <div className="mb-5 flex items-center justify-between gap-4 border-b border-stone-200 pb-4">
         <div>
-          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">Featured</p>
+          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-stone-400">Featured</p>
           <h2 className="font-serif text-3xl">推薦品項</h2>
         </div>
-        <span className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/45">少量精選</span>
+        <span className="rounded-full border border-stone-200 bg-white/70 px-3 py-1 text-xs text-stone-500">少量精選</span>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {featuredItems.map((item) => {
           const { zh, en } = splitMenuName(item.name)
           return (
-            <article key={item.id} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5">
+            <article key={item.id} className="rounded-3xl border border-stone-200 bg-white/70 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-medium">{zh}</h3>
-                  {en && <p className="mt-1 text-xs uppercase tracking-[0.12em] text-white/38">{en}</p>}
-                  {(item.label || item.is_limited) && <p className="mt-3 text-xs tracking-[0.2em] text-white/35">{item.label || 'LIMITED'}</p>}
+                  {en && <p className="mt-1 text-xs uppercase tracking-[0.12em] text-stone-400">{en}</p>}
+                  {(item.label || item.is_limited) && <p className="mt-3 text-xs tracking-[0.2em] text-stone-400">{item.label || 'LIMITED'}</p>}
                 </div>
                 <p className="whitespace-nowrap font-serif text-xl">{formatPrice(item.price)}</p>
               </div>
@@ -188,10 +196,10 @@ function LimitedPanel({ items, fallbackCategory }: { items: MenuItem[]; fallback
 
   return (
     <section className="space-y-5">
-      <div className="flex items-end justify-between gap-4 border-b border-white/10 pb-3">
+      <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3">
         <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.32em] text-white/35">Limited</p>
-          <h2 className="font-serif text-4xl text-[#f8f1e6]/90">期間限定</h2>
+          <p className="mb-1 text-xs uppercase tracking-[0.32em] text-stone-400">Limited</p>
+          <h2 className="font-serif text-4xl text-stone-900">期間限定</h2>
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
@@ -250,7 +258,7 @@ export default function MenuBrowser({ items, categories }: MenuBrowserProps) {
     <>
       <FeaturedMenu items={items} />
 
-      <nav className="sticky top-4 z-10 -mx-5 overflow-x-auto border-y border-white/10 bg-[#15130f]/90 px-5 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:bg-[#211d18]/85">
+      <nav className="sticky top-4 z-10 -mx-5 overflow-x-auto border-y border-stone-200 bg-[#f4efe7]/90 px-5 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:bg-white/80">
         <div className="flex w-max gap-2">
           {navCategories.map((category) => {
             const isActive = activeCategory === category
@@ -261,8 +269,8 @@ export default function MenuBrowser({ items, categories }: MenuBrowserProps) {
                 onClick={() => setActiveCategory(category)}
                 className={
                   isActive
-                    ? 'rounded-full bg-[#f8f1e6] px-5 py-2 text-sm font-medium text-[#15130f] shadow-sm transition'
-                    : 'rounded-full border border-white/10 bg-[#211d18]/75 px-5 py-2 text-sm font-medium text-[#d8cfbf]/65 transition hover:border-white/30 hover:text-[#f8f1e6]'
+                    ? 'rounded-full bg-stone-950 px-5 py-2 text-sm font-medium text-white shadow-sm transition'
+                    : 'rounded-full border border-stone-200 bg-white/75 px-5 py-2 text-sm font-medium text-stone-500 transition hover:border-stone-400 hover:text-stone-900'
                 }
               >
                 {category}
@@ -280,10 +288,10 @@ export default function MenuBrowser({ items, categories }: MenuBrowserProps) {
         <div className="space-y-10">
           {Object.entries(groupedCategoryPanels).map(([groupTitle, group]) => (
             <section key={groupTitle} className="space-y-5">
-              <div className="flex items-end justify-between gap-4 border-b border-white/10 pb-3">
+              <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3">
                 <div>
-                  <p className="mb-1 text-xs uppercase tracking-[0.32em] text-white/35">{group.english}</p>
-                  <h2 className="font-serif text-4xl text-[#f8f1e6]/90">{groupTitle}</h2>
+                  <p className="mb-1 text-xs uppercase tracking-[0.32em] text-stone-400">{group.english}</p>
+                  <h2 className="font-serif text-4xl text-stone-900">{groupTitle}</h2>
                 </div>
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
