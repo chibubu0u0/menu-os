@@ -91,11 +91,11 @@ function OpeningTimeCard({ section }: { section?: SiteSection }) {
   )
 
   return (
-    <aside className="rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-5 text-[#d8cfbf]/70 backdrop-blur md:p-6">
-      <div className="mb-4 flex items-baseline justify-between gap-4 border-b border-white/10 pb-3">
+    <aside className="rounded-[1.75rem] border border-stone-200/90 bg-white/75 p-5 text-stone-600 shadow-sm backdrop-blur md:p-6">
+      <div className="mb-4 flex items-baseline justify-between gap-4 border-b border-stone-200 pb-3">
         <div>
-          <p className="mb-1 text-[0.68rem] uppercase tracking-[0.32em] text-white/35">營業時間</p>
-          <h2 className="font-serif text-2xl leading-none text-[#f8f1e6]">Opening Time</h2>
+          <p className="mb-1 text-[0.68rem] uppercase tracking-[0.32em] text-stone-400">營業時間</p>
+          <h2 className="font-serif text-2xl leading-none text-stone-900">Opening Time</h2>
         </div>
       </div>
       <div className="space-y-2 text-sm leading-7">
@@ -103,7 +103,7 @@ function OpeningTimeCard({ section }: { section?: SiteSection }) {
           <p key={line}>{line}</p>
         ))}
       </div>
-      <p className="mt-4 border-t border-white/10 pt-3 text-xs leading-6 text-white/40">
+      <p className="mt-4 border-t border-stone-200 pt-3 text-xs leading-6 text-stone-400">
         We stop seating guests 30 minutes before closing time.
       </p>
     </aside>
@@ -116,10 +116,10 @@ function SiteSectionCard({ section }: { section: SiteSection }) {
   if (section.style === 'rules') {
     const midpoint = Math.ceil(lines.length / 2)
     return (
-      <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 text-sm leading-7 text-[#d8cfbf]/65 shadow-soft backdrop-blur md:p-8">
-        <div className="mb-5 border-b border-white/10 pb-4">
-          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'House Rules'}</p>
-          <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
+      <section className="rounded-[2rem] border border-stone-200/90 bg-white/80 p-6 text-sm leading-7 text-stone-600 shadow-sm backdrop-blur md:p-8">
+        <div className="mb-5 border-b border-stone-200 pb-4">
+          <p className="mb-2 text-xs uppercase tracking-[0.32em] text-stone-400">{section.english || 'House Rules'}</p>
+          <h2 className="font-serif text-4xl leading-none tracking-tight text-stone-900">{section.title}</h2>
         </div>
         <div className="grid gap-x-10 gap-y-2 md:grid-cols-2">
           {[lines.slice(0, midpoint), lines.slice(midpoint)].map((chunk, index) => (
@@ -136,11 +136,11 @@ function SiteSectionCard({ section }: { section: SiteSection }) {
 
   if (section.style === 'notice') {
     return (
-      <section className="rounded-[2rem] bg-[#2a241d] p-6 text-[#fff6e6] shadow-soft md:p-8">
-        <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Notice'}</p>
+      <section className="rounded-[2rem] border border-amber-200 bg-amber-50/85 p-6 text-stone-900 shadow-sm md:p-8">
+        <p className="mb-2 text-xs uppercase tracking-[0.32em] text-amber-600/70">{section.english || 'Notice'}</p>
         <h2 className="font-serif text-4xl leading-none tracking-tight">{section.title}</h2>
         {lines.length > 0 && (
-          <div className="mt-5 space-y-2 text-sm leading-7 text-white/60">
+          <div className="mt-5 space-y-2 text-sm leading-7 text-stone-600">
             {lines.map((line) => <p key={line}>{line}</p>)}
           </div>
         )}
@@ -149,9 +149,9 @@ function SiteSectionCard({ section }: { section: SiteSection }) {
   }
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[#211d18]/80 p-6 text-sm leading-7 text-[#d8cfbf]/65 shadow-soft backdrop-blur md:p-8">
-      <p className="mb-2 text-xs uppercase tracking-[0.32em] text-white/35">{section.english || 'Section'}</p>
-      <h2 className="font-serif text-4xl leading-none tracking-tight text-[#f8f1e6]">{section.title}</h2>
+    <section className="rounded-[2rem] border border-stone-200/90 bg-white/80 p-6 text-sm leading-7 text-stone-600 shadow-sm backdrop-blur md:p-8">
+      <p className="mb-2 text-xs uppercase tracking-[0.32em] text-stone-400">{section.english || 'Section'}</p>
+      <h2 className="font-serif text-4xl leading-none tracking-tight text-stone-900">{section.title}</h2>
       {lines.length > 0 && (
         <div className="mt-5 space-y-2">
           {lines.map((line) => <p key={line}>{line}</p>)}
@@ -179,16 +179,16 @@ export default async function MenuPage() {
   const heroLines = splitLines(hero?.body || '在城市的縫隙裡，留一段可以慢下來的時間。')
 
   return (
-    <main className="min-h-screen bg-[#15130f] px-5 py-8 text-[#f8f1e6] sm:px-8 lg:px-12">
+    <main className="min-h-screen bg-[#f4efe7] px-5 py-8 text-stone-900 sm:px-8 lg:px-12">
       <section className="mx-auto flex max-w-6xl flex-col gap-8">
-        <header className="rounded-[2rem] border border-white/10 bg-[#211d18]/85 p-7 shadow-soft backdrop-blur md:p-10">
+        <header className="rounded-[2rem] border border-stone-200/90 bg-white/80 p-7 shadow-sm backdrop-blur md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.82fr] lg:items-end">
             <div>
-              <p className="mb-4 text-xs uppercase tracking-[0.42em] text-white/40">Menu OS</p>
-              <h1 className="font-serif text-6xl leading-none tracking-tight md:text-8xl">{restaurantName}</h1>
-              <p className="mt-4 text-sm uppercase tracking-[0.32em] text-white/40">{subtitle}</p>
+              <p className="mb-4 text-xs uppercase tracking-[0.42em] text-stone-400">Menu OS</p>
+              <h1 className="font-serif text-6xl leading-none tracking-tight text-stone-950 md:text-8xl">{restaurantName}</h1>
+              <p className="mt-4 text-sm uppercase tracking-[0.32em] text-stone-400">{subtitle}</p>
               {heroLines.length > 0 && (
-                <div className="mt-8 max-w-xl rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-sm leading-8 text-[#d8cfbf]/65">
+                <div className="mt-8 max-w-xl rounded-3xl border border-stone-200 bg-[#faf7f1] p-5 text-sm leading-8 text-stone-600">
                   {heroLines.map((line) => <p key={line}>{line}</p>)}
                 </div>
               )}
@@ -207,15 +207,15 @@ export default async function MenuPage() {
         )}
 
         {hasSupabaseEnv && displayItems.length === 0 && (
-          <div className="rounded-3xl border border-white/10 bg-[#211d18]/80 p-8 text-center shadow-soft">
-            <p className="text-lg font-semibold text-[#f8f1e6]">目前還沒有上架中的菜單品項</p>
-            <p className="mt-2 text-sm text-[#d8cfbf]/55">登入 /admin 新增品項後，前台會自動顯示。</p>
+          <div className="rounded-3xl border border-stone-200 bg-white/80 p-8 text-center shadow-sm">
+            <p className="text-lg font-semibold text-stone-900">目前還沒有上架中的菜單品項</p>
+            <p className="mt-2 text-sm text-stone-500">登入 /admin 新增品項後，前台會自動顯示。</p>
           </div>
         )}
 
         {displayItems.length > 0 && <MenuBrowser items={displayItems} categories={categories} />}
 
-        <footer className="pb-6 text-center text-xs tracking-[0.28em] text-white/35">Powered by Menu OS</footer>
+        <footer className="pb-6 text-center text-xs tracking-[0.28em] text-stone-400">Powered by Menu OS</footer>
       </section>
     </main>
   )
